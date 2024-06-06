@@ -1,9 +1,10 @@
 
 # To-Do
 
-1. Parse the code and check for syntax 
+1. Parse the code (Recursive Descent + Operator Precedence) and check for syntax 
 2. Type checking 
-3. 
+3. Generate Intermediate Representation of Code
+4. Run the intermediate representation
 
 
 # SYNTAX 
