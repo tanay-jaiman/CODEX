@@ -33,8 +33,8 @@
 
 6. WHILE LOOP :
 
-    whilst (condition) {
-        <condition>
+    whilst (<condition>) {
+        <statements>
     }
 
 
