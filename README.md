@@ -1,13 +1,13 @@
 
 # OVERVIEW 
 
-This project is aimed towards creating a fun scripting language that performs basic computations with possible plans of added functionality like OOP, module imports, etcetra in the future.
+'Codex' is a project that is aimed towards creating a fun scripting language that performs basic computations and instructions.
 
 # THEME
 
-Theme will be decided based on whether some options has already been explored enough or if a meaningful syntax even exists. Possible themes that can be explored are - 
+Codex - a manuscript book especially of Scripture, classics, or ancient annals.
 
-1. Pirate theme - One Piece? - Too niche? or Pirates of the Carribean?
-2. Space theme
-3. Medieval theme (preferred)
-4. Shakespeare theme - can be used alongside medieval?
+The syntax is inspired from medieval speech and thus the name of the language "Codex". 
+
+The purpose of the project has been to create a fun programming language whilst being appropriate and readable syntactically such that the code makes sense to other readers/programmers and performs what it is told.
+
