@@ -1,11 +1,11 @@
 
 # To-Do
 
+0. Create tokens and pre-req libraries
 1. Parse the code (Recursive Descent + Operator Precedence) and check for syntax 
 2. Type checking 
 3. Generate Intermediate Representation of Code
 4. Run the intermediate representation
-
 
 # SYNTAX 
 
@@ -37,4 +37,7 @@
         <statements>
     }
 
+# Problems i run into - 
+
+1. proclaim a=2; is valid syntax but, proclaima=2; is not. This makes whitespace after proclaim a syntactic feature
 
