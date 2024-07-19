@@ -7,13 +7,13 @@
 
 1. CODEX is a compiled, high-level, & weakly-typed scripting language. It takes syntactic inspiration from C++ 
 
-2. Three data types are supported that can be stored inside variables - integers, floating point numerals, and strings. 
+2. Two data types are supported that can be stored inside variables - floating point numerals (any integer declared is automatically type casted into a float), and strings. 
 
-3. All three of the above-mentioned data types are declared implicitly with automatic type casting from integer to float to string in that specified order.
+3. Both of the above-mentioned data types are declared implicitly with automatic type casting from float to string in that specified order.
 
 4. Booleans are used to resolve conditions but can not be used as a data type.
 
-5. There will not be a situation where type errors could arise given the high-level nature of the language where every data-type is allowed type-casting and every data type is also allowed to be compared with another
+5. There will not be a situation where type errors could arise given the high-level nature of the language where every data-type is allowed type-casting and every data type is also allowed to be compared with another. In the case that a string is compared with a float (e.g. "abc" > 1.2) then, float will be type casted into a string like "1.2" and then passed through a strcmp. 
 
 6. Conditional statements are handled using "consider and otherwise" which is the CODEX counterpart of if-else. Note that there is no existing counterpart of "else if" or "elif".
 
