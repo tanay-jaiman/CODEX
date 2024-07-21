@@ -41,3 +41,4 @@
 
 1. proclaim a=2; is valid syntax but, proclaima=2; is not. This makes whitespace after proclaim a syntactic feature
 
+THE END GOAL IS TO CREATE CODEX DOOM WORTHY
