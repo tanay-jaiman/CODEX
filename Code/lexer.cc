@@ -54,7 +54,8 @@ int LexicalAnalyzer::get_token_main(Line current_line, int index) {
         t = scan_string(current_line, index);
         token_list.push_back(quote);
         token_list.push_back(t);
-        token_list.push_back(quote);
+        if (t.token_type == STRING_LITERAL)
+            token_list.push_back(quote);
         return index + t.lexeme.length() + 2;
     }
 
@@ -263,6 +264,7 @@ Token LexicalAnalyzer::scan_symbol(Line current_line, int index) {
 
 Token LexicalAnalyzer::get_token() {
     Token output = Token();
+    output.token_type = END_OF_FILE;
     if (token_index < token_list.size()) {
         output = token_list[token_index];
         token_index++;
@@ -275,7 +277,7 @@ int main() {
     LexicalAnalyzer lexer = LexicalAnalyzer();
     Token t = lexer.get_token();
 
-    while (t.token_type != ERROR) {
+    while (t.token_type != END_OF_FILE) {
         t.printToken();
         t = lexer.get_token();
     }
