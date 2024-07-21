@@ -40,6 +40,9 @@ int LexicalAnalyzer::get_token_main(Line current_line, int index) {
     quote.line_number = current_line.line_number;
     quote.token_type = QUOTES;
 
+    if (index > line[index])
+        return index++;
+
     if (line[index] == ' ') {
         return get_token_main(current_line, index++);
     }
