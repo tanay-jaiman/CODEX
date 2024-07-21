@@ -1,7 +1,7 @@
 #include "lexer.h"
 #include <cctype>
 
-#define DEBUG 1
+#define DEBUG 0
 
 using namespace std;
 
@@ -66,12 +66,14 @@ int LexicalAnalyzer::get_token_main(Line current_line, int index) {
     }
 
     else if (isdigit(line[index])) {
+        if (DEBUG) printf("Number encountered.\n");
         t = scan_number(current_line, index);
         token_list.push_back(t);
         return index + t.lexeme.length();
     }
 
     else {
+        if (DEBUG) printf("Symbol encountered.\n");
         t = scan_symbol(current_line, index);
         token_list.push_back(t);
         return index + 1;
@@ -90,7 +92,7 @@ Token LexicalAnalyzer::scan_string(Line current_line, int index) {
 
     else return output;
 
-    while (line[index] != '\"' || index < line.length()) {
+    while (line[index] != '\"' && index < line.length()) {
         output.lexeme += line[index];
         index++;
     }
@@ -260,12 +262,13 @@ Token LexicalAnalyzer::scan_symbol(Line current_line, int index) {
 }
 
 Token LexicalAnalyzer::get_token() {
-    if (token_index < token_list.size())
-        return token_list[token_index];
-
-    else {
-        return Token();
+    Token output = Token();
+    if (token_index < token_list.size()) {
+        output = token_list[token_index];
+        token_index++;
     }
+
+    return output;
 }
 
 int main() {
