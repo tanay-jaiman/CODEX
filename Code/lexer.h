@@ -44,7 +44,6 @@ class LexicalAnalyzer {
         Token scan_number(Line line, int index);
         Token scan_string(Line line, int index);
         Token scan_symbol(Line line, int index);
-        int next_scan_index(string lexeme);
 };
 
 #endif
