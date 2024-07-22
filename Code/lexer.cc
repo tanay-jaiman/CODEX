@@ -273,6 +273,17 @@ Token LexicalAnalyzer::get_token() {
     return output;
 }
 
+Token LexicalAnalyzer::peek_token(int how_far) {
+    int index = token_index + how_far;
+    Token output = Token();
+    output.token_type = END_OF_FILE;
+
+    if (index < token_list.size())
+        return token_list[index];
+
+    return output;
+}
+
 // int main() {
 //     LexicalAnalyzer lexer = LexicalAnalyzer();
 //     Token t = lexer.get_token();
