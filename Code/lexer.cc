@@ -273,14 +273,14 @@ Token LexicalAnalyzer::get_token() {
     return output;
 }
 
-int main() {
-    LexicalAnalyzer lexer = LexicalAnalyzer();
-    Token t = lexer.get_token();
+// int main() {
+//     LexicalAnalyzer lexer = LexicalAnalyzer();
+//     Token t = lexer.get_token();
 
-    while (t.token_type != END_OF_FILE) {
-        t.printToken();
-        t = lexer.get_token();
-    }
+//     while (t.token_type != END_OF_FILE) {
+//         t.printToken();
+//         t = lexer.get_token();
+//     }
 
-    return 0;
-}
+//     return 0;
+// }
