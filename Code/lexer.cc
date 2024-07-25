@@ -185,6 +185,12 @@ Token LexicalAnalyzer::scan_number(Line current_line, int index) {
         index++;
     }
 
+    if (line[index] == '.') {
+        index++;
+        output.lexeme += '.';
+        output.lexeme += scan_number(current_line, index).lexeme;
+    }
+
     return output;
 }
 
@@ -265,6 +271,7 @@ Token LexicalAnalyzer::scan_symbol(Line current_line, int index) {
 Token LexicalAnalyzer::get_token() {
     Token output = Token();
     output.token_type = END_OF_FILE;
+    output.line_number = token_list[token_list.size() - 1].line_number;
     if (token_index < token_list.size()) {
         output = token_list[token_index];
         token_index++;
@@ -276,6 +283,7 @@ Token LexicalAnalyzer::get_token() {
 Token LexicalAnalyzer::peek_token(int how_far) {
     int index = token_index + how_far;
     Token output = Token();
+    output.line_number = token_list[token_list.size() - 1].line_number;
     output.token_type = END_OF_FILE;
 
     if (index < token_list.size())

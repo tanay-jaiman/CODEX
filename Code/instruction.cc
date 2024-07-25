@@ -34,9 +34,10 @@ Expression * Program::create_expression()
     return expression;
 }
 
-Expression * Program::create_expression(Token value) {
+Expression * Program::create_expression(expression_type type, Token value) {
     Expression * expression = (Expression *) malloc(sizeof(Expression));
 
+    (*expression).type = type;
     (*expression).value = value;
     list_of_all_expressions.push_back(expression);
 
@@ -74,6 +75,7 @@ void Program::destroy_all_expressions() {
 void Program::add_instruction(InstructionNode * instruction) {
     if (!head) {
         head = instruction;
+        return;
     }
 
     InstructionNode * iter = head;
