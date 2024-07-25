@@ -7,14 +7,18 @@ using namespace std;
 
 enum variable_type {
     NUMBER_VAR,
-    STRING_VAR
+    STRING_VAR, 
+    ERROR_VAR,
+    UNDEFINED_VAR
 };
+
+using variable_value = variant<string, float>;
 
 struct Variable {
     bool constant = false;
-    variable_type type;
-    string name;
-    string value;
+    variable_type type = ERROR_VAR;
+    Token token;
+    variable_value value;
 };
 
 enum instruction_type {
@@ -22,7 +26,8 @@ enum instruction_type {
     CJMP_INSTRUCTION,
     JMP_INSTRUCTION,
     PRINT_INSTRUCTION,
-    NOOP_INSTRUCTION
+    NOOP_INSTRUCTION,
+    BREAK_INSTRUCTION
 };
 
 enum boolean_operator {
@@ -34,7 +39,14 @@ enum boolean_operator {
     UNEQUAL
 };
 
+enum expression_type {
+    NUM_EXPR, STRING_EXPR, VAR_EXPR, OP_EXPR, ERROR_EXPR
+};
+
+// using expr_value = variant<Token, float>;
+
 struct Expression {
+    expression_type type;
     Token value;
     Expression * left   = nullptr;
     Expression * right  = nullptr;
@@ -46,13 +58,15 @@ struct Condition {
     Expression * right  = nullptr;
 };
 
+struct InstructionNode;
+
 struct assign_instruction {
     Variable var;
     Expression * expression;
 };
 
 struct print_instruction {
-    vector<string> to_print;
+    Expression * expression;
 };
 
 struct cjmp_instruction {
@@ -79,9 +93,9 @@ struct InstructionNode {
         instruction = assign_instruction{var, expression};
     }
 
-    void set_print_instruction(const vector<string> to_print) {
+    void set_print_instruction(Expression * expression) {
         type = PRINT_INSTRUCTION;
-        instruction = print_instruction{to_print};
+        instruction = print_instruction{expression};
     }
 
     void set_cjmp_instruction(const Condition condition, InstructionNode * ins) {
@@ -101,7 +115,7 @@ class Program {
         InstructionNode * create_instruction(instruction_type);
 
         Expression * create_expression();
-        Expression * create_expression(Token value);
+        Expression * create_expression(expression_type type, Token value);
 
         Condition create_condition();
         Condition create_condition(boolean_operator);
@@ -111,9 +125,14 @@ class Program {
 
         void add_instruction(InstructionNode *);
 
+        void add_variable(Variable);
+        Variable find_variable(string);
+
     private:
         vector<InstructionNode*> list_of_all_instructions;
         vector<Expression*> list_of_all_expressions;
+
+        vector<Variable> list_of_variables;
 
         InstructionNode * head = nullptr;
 };
