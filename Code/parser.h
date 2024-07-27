@@ -1,4 +1,5 @@
 #include "instruction.h"
+#include "operator_precedence.h"
 
 #ifndef PARSER_H
 #define PARSER_H
@@ -7,12 +8,14 @@
 
 using namespace std;
 
+/* Parser class : Responsible for consuming tokens stored by LexicalAnalyzer and parse the program to store execution information like variables declared, creating abstract syntax trees of expressions. */
 class Parser {
     private:
         LexicalAnalyzer lexer;
         Token expect(TokenType);
 
         Program program = Program();
+        OperatorPrecedence table = OperatorPrecedence();
 
     public:
         void syntax_error(int line_number);
@@ -35,11 +38,12 @@ class Parser {
         Token parse_number();
         Token parse_string();
 
-        // parse_id is responsible for adding the variables
-        Variable parse_id(bool variable_exists, bool constant);
+        Variable parse_id(bool being_declared, bool constant);
 
         Condition parse_condition();
         boolean_operator parse_condition_operator();
+
+        stack_node reduce_candidate(vector<stack_node>);
 };
 
 #endif

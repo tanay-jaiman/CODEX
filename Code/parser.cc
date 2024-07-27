@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#define DEBUG 1
+#define DEBUG 0
 
 void Parser::syntax_error(int line_number) {
     printf("Syntax Error found on line number : %d\n", line_number);
@@ -348,7 +348,7 @@ void Parser::throw_declaration_error(int type, Token token) {
 
         This would probably require optimizing instruction.h and making the structures more robust.
 
-        The whole scenario regarding Variables and literals is a bit dodgy. Also needs to be decided if variable assignment is calculated at runtime or parse time?
+        The whole scenario regarding Variables and literals is a bit dodgy. Also needs to be decided if variable assignment is calculated at runtime or parse time? => decision := runtime
 */
 Variable Parser::parse_id(bool variable_exists, bool constant) {
     if (DEBUG) printf("ID parsing started.\n");
@@ -395,43 +395,80 @@ Token Parser::parse_string() {
 // temporary implementation of parse_expression
 Expression * Parser::parse_expression() {
     if (DEBUG) printf("Expression parsing started.\n");
-    Token t = lexer.peek_token(0);
-    Expression * output;
 
-    switch (t.token_type) {
-        case LPAREN:
-            expect(LPAREN);
-            output = parse_expression();
-            expect(RPAREN);
-            break;
+    Stack stack = Stack();
 
-        case QUOTES:
-            parse_string();
-            break;
+    while (true) {
+        if (stack.back().type == TERMINAL && stack.back().terminal.token_type == END_OF_FILE && lexer.peek_symbol(0).token_type == END_OF_FILE) {
+            syntax_error(lexer.peek_token(0).line_number);
+        }
 
-        case ID:
-            parse_id(true, false);
-            break;
+        stack_node last_terminal = stack.peek_terminal();
 
-        case NUMBER:
-            parse_number();
-            break;
+        if (last_terminal.type == ERROR_STACK_NODE)
+            syntax_error(lexer.peek_token(0).line_number);
+
+        precedence p = table.get_precedence(last_terminal.terminal.token_type, lexer.peek_symbol(0).token_type);
+
+        if (p == LESS_PRECEDENCE || p == EQUAL_PRECEDENCE) {
+            stack.push_back(lexer.get_symbol());
+        }
+
+        if (p == MORE_PRECEDENCE) {
+            stack_node last_popped;
+            last_popped.type = EXPRESSION;
+
+            vector<stack_node> candidate;
+
+            while (true) {
+                stack_node popped = stack.pop_back();
+
+                if (popped.type == TERMINAL)
+                    last_popped = popped;
+
+                candidate.push_back(popped);
+
+                last_terminal = stack.peek_terminal();
+
+                if (last_terminal.type == ERROR_STACK_NODE)
+                    syntax_error(lexer.peek_token(0).line_number);
+
+                if (stack.back().type == TERMINAL && last_popped.type == TERMINAL && table.get_precedence(last_terminal.terminal.token_type, last_popped.terminal.token_type) == LESS_PRECEDENCE) {
+                    break;
+                }
+            }
+
+            stack_node E = reduce_candidate(candidate);
+        }
+
+        if (p == ACCEPT_PRECEDENCE)
+            return stack.get(1).expression;
+
+        else 
+            syntax_error(lexer.peek_token(0).line_number);
     }
-
-    t = lexer.peek_token(0);
-
-    if (t.token_type == LANG || t.token_type == RANG || t.token_type == EQUAL || t.token_type == EXCLAMATION || t.token_type == SEMICOLON || t.token_type == RPAREN) {
-        if (DEBUG) printf("Expression parsing completed.\n");
-        return output;
-    }
-
-    else {
-        lexer.get_token();
-        parse_expression();
-    }
+    
 
     if (DEBUG) printf("Expression parsing completed.\n");
-    return output;
+    // return output;
+}
+
+stack_node Parser::reduce_candidate(vector<stack_node> candidate) {
+    stack_node output;
+    output.type = EXPRESSION;
+    if (candidate.size() == 1 && candidate[0].type == TERMINAL) {
+        if (candidate[0].terminal.token_type == NUMBER) {
+            output.expression = program.create_expression(NUM_EXPR, candidate[0].terminal);
+        }
+
+        else if (candidate[0].terminal.token_type == ID) {
+            output.expression = program.create_expression(VAR_EXPR, candidate[0].terminal);
+        }
+
+        else if (candidate[0].terminal.token_type == STRING_LITERAL) {
+            output.expression = program.create_expression(STRING_EXPR, candidate[0].terminal);
+        }
+    }
 }
 
 int main() {

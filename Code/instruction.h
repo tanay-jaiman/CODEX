@@ -5,6 +5,9 @@ using namespace std;
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
+#pragma once
+
+/* Allowed variable types */
 enum variable_type {
     NUMBER_VAR,
     STRING_VAR, 
@@ -12,7 +15,7 @@ enum variable_type {
     UNDEFINED_VAR
 };
 
-using variable_value = variant<string, float>;
+using variable_value = variant<string, float>; // Variable can store either a string or a float
 
 struct Variable {
     bool constant = false;
@@ -109,6 +112,12 @@ struct InstructionNode {
     }
 };
 
+struct TypeError {
+    int line_number;
+    expression_type left;
+    expression_type right;
+};
+
 class Program {
     public:
         InstructionNode * create_instruction();
@@ -128,11 +137,16 @@ class Program {
         void add_variable(Variable);
         Variable find_variable(string);
 
+        void add_type_error(TypeError);
+
     private:
         vector<InstructionNode*> list_of_all_instructions;
+
         vector<Expression*> list_of_all_expressions;
 
         vector<Variable> list_of_variables;
+
+        vector<TypeError> list_of_type_errors;
 
         InstructionNode * head = nullptr;
 };
