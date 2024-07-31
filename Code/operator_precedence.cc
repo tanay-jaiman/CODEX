@@ -2,13 +2,14 @@
 
 using namespace std;
 
-#define DEBUG 1
+#define DEBUG 0
 
 stack_node Stack::peek_terminal() {
+    if (DEBUG) printf("stack size : %d\n", stack.size());
     if (stack.back().type == TERMINAL)
         return stack.back();
 
-    else if (stack[stack.size() - 2].type == TERMINAL)
+    else if (stack.size() >= 2 && stack[stack.size() - 2].type == TERMINAL)
         return stack[stack.size() - 2];
 
     else {
@@ -36,6 +37,10 @@ void Stack::push_back(Expression* expr) {
     sn.type = EXPRESSION;
 
     stack.push_back(sn);
+}
+
+void Stack::push_back(stack_node s) {
+    stack.push_back(s);
 }
 
 stack_node Stack::back() {
@@ -111,7 +116,11 @@ int OperatorPrecedence::get_index(TokenType t) {
 
 precedence OperatorPrecedence::get_precedence(TokenType t1, TokenType t2) {
     if (DEBUG) printf("precedence - %d & %d\n", get_index(t1), get_index(t2));
-    return table[get_index(t1)][get_index(t2)];
+
+    if (get_index(t1) < 8 && get_index(t2) < 8)
+        return table[get_index(t1)][get_index(t2)];
+
+    else return ERROR_PRECEDENCE;
 }
 
 stack_node Stack::get(int index) {

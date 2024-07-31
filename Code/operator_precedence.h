@@ -31,6 +31,7 @@ class Stack {
         stack_node peek_terminal();
         void push_back(Token);
         void push_back(Expression*);
+        void push_back(stack_node);
 
         stack_node pop_back();
         stack_node back();
@@ -53,7 +54,7 @@ class OperatorPrecedence {
     public:
         OperatorPrecedence() {
             create_table();
-            print_table();
+            // print_table();
         }
 
         precedence get_precedence(TokenType, TokenType);

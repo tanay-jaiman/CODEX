@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#define DEBUG 1
+#define DEBUG 0
 
 void Parser::syntax_error(int line_number) {
     printf("Syntax Error found on line number : %d\n", line_number);
@@ -444,6 +444,7 @@ Expression * Parser::parse_expression() {
             }
 
             stack_node E = reduce_candidate(candidate);
+            stack.push_back(E);
         }
 
         else if (p == ACCEPT_PRECEDENCE)
@@ -472,6 +473,7 @@ stack_node Parser::reduce_candidate(vector<stack_node> candidate) {
     stack_node output;
     output.type = EXPRESSION;
     if (candidate.size() == 1 && candidate[0].type == TERMINAL) {
+        if (DEBUG) printf("literal candidate reduction case\n");
         if (candidate[0].terminal.token_type == NUMBER) {
             output.expression = program.create_expression(NUM_EXPR, candidate[0].terminal);
         }
@@ -518,6 +520,8 @@ stack_node Parser::reduce_candidate(vector<stack_node> candidate) {
     else {
         syntax_error(lexer.peek_token(0).line_number);
     }
+
+    return output;
 
     if (DEBUG) printf("Candidate expression reduction complete\n");
 }
