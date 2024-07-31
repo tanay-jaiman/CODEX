@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#define DEBUG 0
+#define DEBUG 1
 
 void Parser::syntax_error(int line_number) {
     printf("Syntax Error found on line number : %d\n", line_number);
@@ -383,9 +383,9 @@ Token Parser::parse_number() {
 Token Parser::parse_string() {
     if (DEBUG) printf("String parsing started.\n");
 
-    expect(QUOTES);
+    // expect(QUOTES);
     Token t = expect(STRING_LITERAL);
-    expect(QUOTES);
+    // expect(QUOTES);
 
     if (DEBUG) printf("String parsing completed.\n");
 
@@ -410,11 +410,16 @@ Expression * Parser::parse_expression() {
 
         precedence p = table.get_precedence(last_terminal.terminal.token_type, lexer.peek_symbol(0).token_type);
 
+        if (DEBUG) printf("last_terminal : %d\n", last_terminal.terminal.token_type);
+        if (DEBUG) printf("peek_symbol : %d\n", lexer.peek_symbol(0).token_type);
+
+        if (DEBUG) printf("Precedence case : %d\n", p);
+
         if (p == LESS_PRECEDENCE || p == EQUAL_PRECEDENCE) {
             stack.push_back(lexer.get_symbol());
         }
 
-        if (p == MORE_PRECEDENCE) {
+        else if (p == MORE_PRECEDENCE) {
             stack_node last_popped;
             last_popped.type = EXPRESSION;
 
@@ -441,7 +446,7 @@ Expression * Parser::parse_expression() {
             stack_node E = reduce_candidate(candidate);
         }
 
-        if (p == ACCEPT_PRECEDENCE)
+        else if (p == ACCEPT_PRECEDENCE)
             return stack.get(1).expression;
 
         else 
@@ -453,7 +458,17 @@ Expression * Parser::parse_expression() {
     // return output;
 }
 
+Expression * Program::combine_expressions(Token OP, Expression * left, Expression * right) {
+    Expression * output = create_expression(OP_EXPR, OP);
+    output->left = left;
+    output->right = right;
+
+    return output;
+}
+
 stack_node Parser::reduce_candidate(vector<stack_node> candidate) {
+    if (DEBUG) printf("Candidate expression reduction started\n");
+
     stack_node output;
     output.type = EXPRESSION;
     if (candidate.size() == 1 && candidate[0].type == TERMINAL) {
@@ -468,7 +483,43 @@ stack_node Parser::reduce_candidate(vector<stack_node> candidate) {
         else if (candidate[0].terminal.token_type == STRING_LITERAL) {
             output.expression = program.create_expression(STRING_EXPR, candidate[0].terminal);
         }
+
+        else {
+            syntax_error(lexer.peek_token(0).line_number);
+        }
     }
+
+    // reduce (E) | E +-*/ E
+    else if (candidate.size() == 3) {
+        if (candidate[0].type == TERMINAL && candidate[1].type == EXPRESSION && candidate[2].type == TERMINAL) {
+            if (candidate[0].terminal.token_type == LPAREN && candidate[2].terminal.token_type == RPAREN) {
+                output.expression = candidate[1].expression;
+            }
+
+            else {
+                syntax_error(lexer.peek_token(0).line_number);
+            }
+        }
+
+        else if (candidate[0].type == EXPRESSION && candidate[1].type == TERMINAL && candidate[2].type == EXPRESSION) {
+            if (candidate[1].terminal.token_type == PLUS || candidate[1].terminal.token_type == MINUS || candidate[1].terminal.token_type == MULT || candidate[1].terminal.token_type == DIV) {
+                output.expression = program.combine_expressions(candidate[1].terminal, candidate[0].expression, candidate[2].expression);
+            }
+
+            else 
+                syntax_error(lexer.peek_token(0).line_number);
+        }
+
+        else {
+            syntax_error(lexer.peek_token(0).line_number);
+        } 
+    }
+
+    else {
+        syntax_error(lexer.peek_token(0).line_number);
+    }
+
+    if (DEBUG) printf("Candidate expression reduction complete\n");
 }
 
 int main() {

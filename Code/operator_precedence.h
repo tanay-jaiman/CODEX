@@ -46,12 +46,14 @@ class OperatorPrecedence {
         void create_table();
         void create_row(string);
         int get_index(TokenType);
+        void print_table();
 
         vector<vector<precedence>> table;
 
     public:
         OperatorPrecedence() {
             create_table();
+            print_table();
         }
 
         precedence get_precedence(TokenType, TokenType);
