@@ -65,10 +65,10 @@ int LexicalAnalyzer::get_token_main(Line current_line, int index)
         if (DEBUG)
             printf("String encountered.\n");
         t = scan_string(current_line, index);
-        token_list.push_back(quote);
+        // token_list.push_back(quote);
         token_list.push_back(t);
         if (t.token_type == STRING_LITERAL)
-            token_list.push_back(quote);
+            // token_list.push_back(quote);
         return index + t.lexeme.length() + 2;
     }
 
@@ -375,6 +375,7 @@ Token LexicalAnalyzer::peek_symbol(int how_far)
     TokenType t2 = peek_token(how_far + 1).token_type;
 
     Token end_of_file = Token();
+    end_of_file.line_number = peek_token(how_far).token_type;
     end_of_file.token_type = END_OF_FILE;
 
     if (t1 == SEMICOLON)

@@ -125,6 +125,7 @@ class Program {
 
         Expression * create_expression();
         Expression * create_expression(expression_type type, Token value);
+        Expression * combine_expressions(Token OP, Expression * left, Expression * right);
 
         Condition create_condition();
         Condition create_condition(boolean_operator);

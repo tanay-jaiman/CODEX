@@ -2,11 +2,14 @@
 
 using namespace std;
 
+#define DEBUG 0
+
 stack_node Stack::peek_terminal() {
+    if (DEBUG) printf("stack size : %d\n", stack.size());
     if (stack.back().type == TERMINAL)
         return stack.back();
 
-    else if (stack[stack.size() - 2].type == TERMINAL)
+    else if (stack.size() >= 2 && stack[stack.size() - 2].type == TERMINAL)
         return stack[stack.size() - 2];
 
     else {
@@ -36,6 +39,10 @@ void Stack::push_back(Expression* expr) {
     stack.push_back(sn);
 }
 
+void Stack::push_back(stack_node s) {
+    stack.push_back(s);
+}
+
 stack_node Stack::back() {
     return stack.back();
 }
@@ -47,13 +54,15 @@ void OperatorPrecedence::create_table() {
     create_row("02220020");
     create_row("02222220");
     create_row("02222220");
+    create_row("04000030");
     create_row("42222224");
 }
 
 void OperatorPrecedence::create_row(string row) {
     vector<precedence> table_row;
     for (int i = 0; i < row.length(); i++) {
-        table_row.push_back((precedence) atoi(&row[i]));
+        char c = row[i];
+        table_row.push_back((precedence) atoi(&c));
     }
 
     table.push_back(table_row);
