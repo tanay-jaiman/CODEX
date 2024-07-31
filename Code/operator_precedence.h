@@ -31,6 +31,7 @@ class Stack {
         stack_node peek_terminal();
         void push_back(Token);
         void push_back(Expression*);
+        void push_back(stack_node);
 
         stack_node pop_back();
         stack_node back();
