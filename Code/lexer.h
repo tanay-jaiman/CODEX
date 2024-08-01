@@ -1,9 +1,6 @@
 #include "inputbuf.h"
 
-using namespace std;
-
-#ifndef LEXER_H
-#define LEXER_H
+#pragma once
 
 /* Defined token types */
 enum TokenType
@@ -70,6 +67,7 @@ public:
 
     Token get_token();
     Token peek_token(int how_far);
+    Token unget_token();
 
     /* 
     Parse Expression get/peek symbol functions : helps to find when to stop reading expression since the expression part of the grammar is ambiguous
@@ -91,5 +89,3 @@ private:
     Token scan_string(Line line, int index);
     Token scan_symbol(Line line, int index);
 };
-
-#endif

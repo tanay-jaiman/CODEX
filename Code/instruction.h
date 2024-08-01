@@ -1,10 +1,5 @@
 #include "lexer.h"
 
-using namespace std;
-
-#ifndef INSTRUCTION_H
-#define INSTRUCTION_H
-
 #pragma once
 
 /* Allowed variable types */
@@ -151,5 +146,3 @@ class Program {
 
         InstructionNode * head = nullptr;
 };
-
-#endif

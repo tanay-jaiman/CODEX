@@ -66,8 +66,9 @@ int LexicalAnalyzer::get_token_main(Line current_line, int index)
             printf("String encountered.\n");
         t = scan_string(current_line, index);
         // token_list.push_back(quote);
-        token_list.push_back(t);
+        
         if (t.token_type == STRING_LITERAL)
+            token_list.push_back(t);
             // token_list.push_back(quote);
         return index + t.lexeme.length() + 2;
     }
@@ -313,6 +314,8 @@ Token LexicalAnalyzer::scan_symbol(Line current_line, int index)
     return output;
 }
 
+Token L
+
 Token LexicalAnalyzer::get_token()
 {
     Token output = Token();
@@ -334,8 +337,9 @@ Token LexicalAnalyzer::peek_token(int how_far)
     output.line_number = token_list[token_list.size() - 1].line_number;
     output.token_type = END_OF_FILE;
 
-    if (index < token_list.size())
+    if (index < token_list.size()) {
         return token_list[index];
+    }
 
     return output;
 }

@@ -3,8 +3,7 @@
 
 using namespace std;
 
-#ifndef INPUT_BUF_H
-#define INPUT_BUF_H
+#pragma once
 
 /*
     Stores a line of program code
@@ -35,5 +34,3 @@ class InputBuffer {
 
         int buf_index = 0;
 };
-
-#endif

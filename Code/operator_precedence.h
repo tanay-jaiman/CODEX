@@ -1,10 +1,5 @@
 #include "instruction.h"
 
-using namespace std;
-
-#ifndef OPERATOR_H
-#define OPERATOR_H
-
 #pragma once
 
 enum precedence {LESS_PRECEDENCE, EQUAL_PRECEDENCE, MORE_PRECEDENCE, ACCEPT_PRECEDENCE, ERROR_PRECEDENCE};
@@ -57,5 +52,3 @@ class OperatorPrecedence {
 
         precedence get_precedence(TokenType, TokenType);
 };
-
-#endif

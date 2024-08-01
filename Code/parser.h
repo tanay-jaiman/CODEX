@@ -1,12 +1,6 @@
-#include "instruction.h"
 #include "operator_precedence.h"
 
-#ifndef PARSER_H
-#define PARSER_H
-
 #pragma once
-
-using namespace std;
 
 /* Parser class : Responsible for consuming tokens stored by LexicalAnalyzer and parse the program to store execution information like variables declared, creating abstract syntax trees of expressions. */
 class Parser {
@@ -18,6 +12,7 @@ class Parser {
         OperatorPrecedence table = OperatorPrecedence();
 
     public:
+        // TODO : MODIFY SYNTAX ERROR TO DISPLAY ACCURATE LINE NUMBER BY REMOVING THE PARAMETER AND INSTEAD USING UNGETTOKEN
         void syntax_error(int line_number);
         void throw_declaration_error(int type, Token token);
 
@@ -45,5 +40,3 @@ class Parser {
 
         stack_node reduce_candidate(vector<stack_node>);
 };
-
-#endif
