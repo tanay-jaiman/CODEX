@@ -9,9 +9,9 @@
 3. Both of the above-mentioned data types are declared implicitly with automatic type casting from float to string in that specified order.
 4. Booleans are used to resolve conditions but cannot be used as a data type.
 5. Errors : 
-    -   Syntax errors work like any language, if the syntax is violated then, an error is thrown.
-    -   Type errors are thrown only in the case of subtraction, multiplication, or division between strings and numbers. In case of addition or boolean comparison between different types, float is casted into string and passed through a `strcmp`. 
-    -   Declaration errors arise in one of the following cases :
+    -   **Syntax errors** work like any language, if the syntax is violated then, an error is thrown.
+    -   **Type errors** are thrown only in the case of subtraction, multiplication, or division between strings and numbers. In case of addition or boolean comparison between different types, float is casted into string and passed through a `strcmp`. 
+    -   **Declaration errors** arise in one of the following cases :
         1. A variable is used but was never declared
         2. A variable is being declared that has already been declared (note that assignment is not the same as declaration)
         3. A variable was declared as a constant(`engrave`) but an attempt to assign it to another value was made.
