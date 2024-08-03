@@ -1,7 +1,5 @@
 #include "inputbuf.h"
 
-#define DEBUG 0
-
 using namespace std;
 
 /*
@@ -10,7 +8,6 @@ using namespace std;
 InputBuffer::InputBuffer() {
     char c = getchar();
     while (c != EOF) {
-        if (DEBUG) printf("character being added : %c\n", c);
         char_list.push_back(c);
         c = getchar();
     }
@@ -86,7 +83,6 @@ void InputBuffer::populate_line_list() {
 */
 Line InputBuffer::get_line() {
     if (line_list.empty()) {
-        if (DEBUG) printf("LINE LIST EMPTY.\n");
         return Line();
     }
     
@@ -95,14 +91,3 @@ Line InputBuffer::get_line() {
 
     return output;
 }
-
-// int main() {
-//     InputBuffer buffer;
-//     Line current_line = buffer.get_line();
-
-//     while (current_line.line_number != -1) {
-//         printf("%s\n", current_line.line.c_str());
-//         current_line = buffer.get_line();
-//     }
-//     return 0;
-// }

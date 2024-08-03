@@ -2,20 +2,24 @@
 
 'CODEX' is a project aimed at creating a fun scripting language that performs basic computations and instructions. It is inspired by the medieval tongue with a neat Witcher 3 reference.
 
-## Features and Drawbacks (0.1.0)
+## Features and Drawbacks (0.2.0)
 
-1. **CODEX** is a compiled, high-level, & weakly-typed scripting language. It takes syntactic inspiration from C++.
+1. **CODEX** is an interpreted, high-level, & weakly-typed scripting language. It takes syntactic inspiration from C++.
 2. Two data types are supported that can be stored inside variables - floating point numerals (any integer declared is automatically type casted into a float), and strings.
 3. Both of the above-mentioned data types are declared implicitly with automatic type casting from float to string in that specified order.
 4. Booleans are used to resolve conditions but cannot be used as a data type.
-5. There will not be a situation where type errors could arise given the high-level nature of the language where every data type is allowed type-casting and every data type is also allowed to be compared with another. In the case that a string is compared with a float (e.g. "abc" > 1.2), the float will be type casted into a string like "1.2" and then passed through a `strcmp`.
-
-    Be careful as it might remove the possibility of type errors, but can cause unambiguous/unexpected results.
+5. Errors : 
+    -   Syntax errors work like any language, if the syntax is violated then, an error is thrown.
+    -   Type errors are thrown only in the case of subtraction, multiplication, or division between strings and numbers. In case of addition or boolean comparison between different types, float is casted into string and passed through a `strcmp`. 
+    -   Declaration errors arise in one of the following cases :
+        1. A variable is used but was never declared
+        2. A variable is being declared that has already been declared (note that assignment is not the same as declaration)
+        3. A variable was declared as a constant(`engrave`) but an attempt to assign it to another value was made.
 
 6. Conditional statements are handled using "consider and otherwise," which is the CODEX counterpart of if-else. Note that there is no existing counterpart of "else if" or "elif."
 7. Looping through statements is handled by "whilst," which is the CODEX counterpart of a while loop. Note that there is no existing counterpart of a "for loop."
 8. Comments are similar to how they would be declared in C++ with the use of `//`. There is, however, no support for multi-line comments.
-9. Currently, there is no support for arrays/lists, structs, enums, or substrings.
+9. Currently, there is no support for arrays/lists, structs, enums, or functions.
 
 ## Syntax
 

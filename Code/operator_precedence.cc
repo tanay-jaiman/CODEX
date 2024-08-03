@@ -2,10 +2,7 @@
 
 using namespace std;
 
-#define DEBUG 0
-
 stack_node Stack::peek_terminal() {
-    if (DEBUG) printf("stack size : %d\n", stack.size());
     if (stack.back().type == TERMINAL)
         return stack.back();
 

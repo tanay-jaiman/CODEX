@@ -1,12 +1,12 @@
 #include "execute.h"
-#include <format>
+#include <iomanip>
+#include <sstream>
 
-#define DEBUG 0
-#define VAR_DEBUG 0
+// forward declarations for helping functions
+string float_to_string_precision(float, int);
 
 void Execute::execute_program()
 {
-    if (DEBUG) printf("starting program execution\n");
     program_counter = program.get_head();
     while (program_counter)
     {
@@ -14,7 +14,9 @@ void Execute::execute_program()
             break_instructions.pop_back();
         execute_instruction_node(program_counter);
     }
-    if (DEBUG) printf("completed program execution\n");
+
+    program.destroy_all_expressions();
+    program.destroy_all_instructions();
 }
 
 void Execute::execute_instruction_node(InstructionNode *ins)
@@ -52,7 +54,6 @@ void Execute::execute_assign_instruction(assign_instruction assign)
 {
     Variable var = program.find_variable(assign.var.token.lexeme);
     // If variable is undefined then give it a value
-    if (DEBUG) printf("starting assign instruction execution\n");
     if (var.type == UNDEFINED_VAR || var.constant == false)
     {
         var.value = resolve_expression(assign.expression);
@@ -67,7 +68,7 @@ void Execute::execute_assign_instruction(assign_instruction assign)
             var.type = NUMBER_VAR;
         }
 
-        program.list_of_variables[program.get_variable_index(var.token.lexeme)] = var;
+        program.update_variable(program.get_variable_index(var.token.lexeme), var);
     }
 
     // else if variable is initialized (not undefined) and a constant, throw error
@@ -78,12 +79,10 @@ void Execute::execute_assign_instruction(assign_instruction assign)
     }
 
     program_counter = program_counter->next;
-    if (DEBUG) printf("completed assign instruction execution\n");
 }
 
 void Execute::execute_cjmp_instruction(cjmp_instruction cjmp)
 {
-    if (DEBUG) printf("starting cjmp execution\n");
 
     bool condition_result = resolve_condition(cjmp.condition);
     if (cjmp.is_while)
@@ -95,7 +94,6 @@ void Execute::execute_cjmp_instruction(cjmp_instruction cjmp)
     else
         program_counter = program_counter->next;
     
-    if (DEBUG) printf("completed cjmp execution\n");
 }
 
 void Execute::execute_jmp_instruction(jmp_instruction jmp)
@@ -111,7 +109,6 @@ void Execute::execute_break_instruction() {
 }
 
 void Execute::execute_print_instruction(print_instruction print) {
-    if (DEBUG) printf("starting print execution\n");
     auto value = resolve_expression(print.expression);
 
     if (holds_alternative<string>(value)) {
@@ -123,7 +120,6 @@ void Execute::execute_print_instruction(print_instruction print) {
     }
 
     program_counter = program_counter->next;
-    if (DEBUG) printf("complete print execution\n");
 }
 
 bool Execute::resolve_condition_helper(variable_value left, variable_value right, boolean_operator op) {
@@ -173,11 +169,8 @@ bool Execute::resolve_condition_helper(variable_value left, variable_value right
 }
 
 bool Execute::resolve_condition(Condition condition) {
-    if (DEBUG) printf("starting resolve condition\n");
     auto left_val = resolve_expression(condition.left);
-    // if (VAR_DEBUG) printf("%s\n", get<string>(left_val).c_str());
     auto right_val = resolve_expression(condition.right);
-    // if (VAR_DEBUG) printf("%s\n", get<string>(right_val).c_str());
 
     if (holds_alternative<string>(left_val) && holds_alternative<float>(right_val)) {
         right_val = to_string(get<float>(right_val));
@@ -189,11 +182,15 @@ bool Execute::resolve_condition(Condition condition) {
 
     return resolve_condition_helper(left_val, right_val, condition.oper);
 
-    if (DEBUG) printf("completed resolve condition.\n");
+}
+
+string float_to_string_precision(float f, int precision) {
+    stringstream out;
+    out << fixed << setprecision(precision) << f;
+    return out.str();
 }
 
 variable_value Execute::resolve_expression(Expression * expr) {
-    if (DEBUG) printf("starting resolve expression\n");
     variable_value output;
     if (expr->left == nullptr && expr->right == nullptr) {
         if (expr->type == STRING_EXPR) {
@@ -202,33 +199,27 @@ variable_value Execute::resolve_expression(Expression * expr) {
 
         else if (expr->type == NUM_EXPR) {
             output = (float) atof(expr->value.lexeme.c_str());
-            // if (VAR_DEBUG) printf("%f\n", get<float>(output));
         }
 
         else if (expr->type == VAR_EXPR) {
             output = program.find_variable(expr->value.lexeme).value;
-            // if (VAR_DEBUG) printf("%s\n", get<string>(output).c_str());
         }
-
-        // if (DEBUG) printf("%s\n", get<string>(output).c_str());
-        if (DEBUG) printf("completed resolve expression\n");
 
         return output;
     }
 
     if (expr->type == OP_EXPR) {
         auto left = resolve_expression(expr->left);
-        if (DEBUG) printf("%s\n", get<string>(left).c_str());
         auto right = resolve_expression(expr->right);
-        if (DEBUG) printf("%s\n", get<string>(right).c_str());
         switch(expr->value.token_type) {
             // addition is allowed between all. string + number => string 
             case PLUS:
                 if (holds_alternative<string>(left) && holds_alternative<float>(right))
-                    right = to_string(get<float>(right));
+                    right = float_to_string_precision(get<float>(right), 2);
 
                 else if (holds_alternative<float>(left) && holds_alternative<string>(right)) {
-                    left = to_string(get<float>(left));
+                    
+                    left = float_to_string_precision(get<float>(left), 2);
                 }
 
                 if (holds_alternative<string>(left) && holds_alternative<string>(right))
@@ -269,7 +260,6 @@ variable_value Execute::resolve_expression(Expression * expr) {
     }
 
     return output;
-    if (DEBUG) printf("completed resolve expression\n");
 }
 
 void Execute::throw_type_error(type_error err) {

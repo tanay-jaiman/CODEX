@@ -85,3 +85,7 @@ void Program::add_instruction(InstructionNode * instruction) {
 
     iter->next = instruction;
 }
+
+void Program::update_variable(int index, Variable var) {
+    list_of_variables[index] = var;
+}

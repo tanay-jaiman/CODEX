@@ -1,7 +1,4 @@
 #include "lexer.h"
-// #include <cctype>
-
-#define DEBUG 0
 
 using namespace std;
 
@@ -50,20 +47,13 @@ int LexicalAnalyzer::get_token_main(Line current_line, int index)
     quote.line_number = current_line.line_number;
     quote.token_type = QUOTES;
 
-    if (DEBUG)
-        printf("Start of get_token_main()\n");
-
     if (line[index] == ' ')
     {
-        if (DEBUG)
-            printf("Space encountered.\n");
         return index + 1;
     }
 
     else if (line[index] == '\"')
     {
-        if (DEBUG)
-            printf("String encountered.\n");
         t = scan_string(current_line, index);
         // token_list.push_back(quote);
         
@@ -75,8 +65,6 @@ int LexicalAnalyzer::get_token_main(Line current_line, int index)
 
     else if (isalpha(line[index]))
     {
-        if (DEBUG)
-            printf("ID or Keyword encountered.\n");
         t = scan_id_or_keyword(current_line, index);
         token_list.push_back(t);
         return index + t.lexeme.length();
@@ -84,8 +72,6 @@ int LexicalAnalyzer::get_token_main(Line current_line, int index)
 
     else if (isdigit(line[index]))
     {
-        if (DEBUG)
-            printf("Number encountered.\n");
         t = scan_number(current_line, index);
         token_list.push_back(t);
         return index + t.lexeme.length();
@@ -93,8 +79,6 @@ int LexicalAnalyzer::get_token_main(Line current_line, int index)
 
     else
     {
-        if (DEBUG)
-            printf("Symbol encountered.\n");
         t = scan_symbol(current_line, index);
         token_list.push_back(t);
         return index + 1;
@@ -409,15 +393,3 @@ Token LexicalAnalyzer::peek_symbol(int how_far)
 
     return peek_token(how_far);
 }
-
-// int main() {
-//     LexicalAnalyzer lexer = LexicalAnalyzer();
-//     Token t = lexer.get_token();
-
-//     while (t.token_type != END_OF_FILE) {
-//         t.printToken();
-//         t = lexer.get_token();
-//     }
-
-//     return 0;
-// }

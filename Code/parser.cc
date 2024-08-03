@@ -2,8 +2,6 @@
 
 using namespace std;
 
-#define DEBUG 0
-
 void Parser::syntax_error() {
     printf("Syntax Error found on line number : %d\n", lexer.unget_token().line_number);
     exit(1);
@@ -29,7 +27,6 @@ bool Parser::comment_found() {
 }
 
 void Parser::skip_comment() {
-    if (DEBUG) printf("Comment found.\n");
     Token t = lexer.get_token();
     while (lexer.peek_token(0).line_number == t.line_number && lexer.peek_token(0).token_type != END_OF_FILE) {
         lexer.get_token();
@@ -45,7 +42,6 @@ void Parser::parse_program() {
     parse_statement_list();
     expect(END_OF_FILE);
 
-    if (DEBUG) printf("NO SYNTAX ERRORS FOUND.\n");
 }
 
 void Parser::parse_statement_list() {
@@ -124,7 +120,6 @@ void Parser::parse_statement() {
 }
 
 void Parser::parse_assign_statement() {
-    if (DEBUG) printf("Assign statement parsing started\n");
     bool variable_exists = false;
     bool constant = false;
     if (lexer.peek_token(0).token_type == PROCLAIM)
@@ -154,14 +149,10 @@ void Parser::parse_assign_statement() {
     // skip comments
     if (comment_found())
         skip_comment();
-
-    if (DEBUG) printf("Assign statement parsing complete.\n");
 }
 
 // print_statement := ANNOUNCE <expression> SEMICOLON
 void Parser::parse_print_statement() {
-    if (DEBUG) printf("Print statement parsing started.\n");
-
     expect(ANNOUNCE);
     Expression * expression = parse_expression();
 
@@ -170,16 +161,12 @@ void Parser::parse_print_statement() {
     program.add_instruction(instruction);
 
     expect(SEMICOLON);
-
-    if (DEBUG) printf("Print statement parsing complete.\n");
 }
 
 /*
     CONSIDER (<CONDITION>) { <STATEMENT_LIST> } [OTHERWISE { <STATEMENT_LIST> }]
 */
 void Parser::parse_if_statement() {
-    if (DEBUG) printf("If statement parsing started.\n");
-
     expect(CONSIDER);
     expect(LPAREN);
 
@@ -216,14 +203,12 @@ void Parser::parse_if_statement() {
     }
 
     program.add_instruction(end_of_if);
-    if (DEBUG) printf("If statement parsing complete.\n");
 }
 
 /*
     WHILST (<CONDITION>) { <STATEMENT_LIST> }
 */
 void Parser::parse_while_statement() {
-    if (DEBUG) printf("While parsing started.\n");
     expect(WHILST);
 
     expect(LPAREN);
@@ -249,10 +234,7 @@ void Parser::parse_while_statement() {
 
     expect(RBRACE);
 
-    if (DEBUG) printf("While parsing completed.\n");
-
     program.add_instruction(end_of_while);
-    if (DEBUG) printf("While parsing completed.\n");
 }
 
 /*
@@ -360,7 +342,6 @@ void Parser::throw_declaration_error(int type, Token token) {
     - If a variable is being accessed and it doens't exist, error (T2)
 */
 Variable Parser::parse_id(bool variable_exists, bool constant) {
-    if (DEBUG) printf("ID parsing started.\n");
     Token t = expect(ID);
     Variable var = program.find_variable(t.lexeme);;
 
@@ -381,7 +362,6 @@ Variable Parser::parse_id(bool variable_exists, bool constant) {
         }
     }
 
-    if (DEBUG) printf("ID parsing completed.\n");
     return var;
 }
 
@@ -390,33 +370,23 @@ Token Parser::parse_number() {
 }
 
 Token Parser::parse_string() {
-    if (DEBUG) printf("String parsing started.\n");
-
-    // expect(QUOTES);
-    Token t = expect(STRING_LITERAL);
-    // expect(QUOTES);
-
-    if (DEBUG) printf("String parsing completed.\n");
-
-    return t;
+    return expect(STRING_LITERAL);
 }
 
 // temporary implementation of parse_expression
 Expression * Parser::parse_expression() {
-    if (DEBUG) printf("Expression parsing started.\n");
-
     Stack stack = Stack();
 
     while (true) {
-        if (DEBUG) printf("Parse Expression Loop\n");
         if (stack.back().type == TERMINAL && stack.back().terminal.token_type == END_OF_FILE && lexer.peek_symbol(0).token_type == END_OF_FILE) {
             syntax_error();
         }
 
         stack_node last_terminal = stack.peek_terminal();
 
-        if (last_terminal.type == ERROR_STACK_NODE)
+        if (last_terminal.type == ERROR_STACK_NODE) {
             syntax_error();
+        }
 
         precedence p = table.get_precedence(last_terminal.terminal.token_type, lexer.peek_symbol(0).token_type);
 
@@ -440,8 +410,9 @@ Expression * Parser::parse_expression() {
 
                 last_terminal = stack.peek_terminal();
 
-                if (last_terminal.type == ERROR_STACK_NODE)
+                if (last_terminal.type == ERROR_STACK_NODE) {
                     syntax_error();
+                }
 
                 if (stack.back().type == TERMINAL && last_popped.type == TERMINAL && table.get_precedence(last_terminal.terminal.token_type, last_popped.terminal.token_type) == LESS_PRECEDENCE) {
                     break;
@@ -458,10 +429,6 @@ Expression * Parser::parse_expression() {
         else 
             syntax_error();
     }
-    
-
-    if (DEBUG) printf("Expression parsing completed.\n");
-    // return output;
 }
 
 Expression * Program::combine_expressions(Token OP, Expression * left, Expression * right) {
@@ -473,12 +440,9 @@ Expression * Program::combine_expressions(Token OP, Expression * left, Expressio
 }
 
 stack_node Parser::reduce_candidate(vector<stack_node> candidate) {
-    if (DEBUG) printf("Candidate expression reduction started\n");
-
     stack_node output;
     output.type = EXPRESSION;
     if (candidate.size() == 1 && candidate[0].type == TERMINAL) {
-        if (DEBUG) printf("literal candidate reduction case\n");
         if (candidate[0].terminal.token_type == NUMBER) {
             output.expression = program.create_expression(NUM_EXPR, candidate[0].terminal);
         }
@@ -499,7 +463,6 @@ stack_node Parser::reduce_candidate(vector<stack_node> candidate) {
     // reduce (E) | E +-*/ E
     else if (candidate.size() == 3) {
         if (candidate[0].type == TERMINAL && candidate[1].type == EXPRESSION && candidate[2].type == TERMINAL) {
-            if (DEBUG) printf("(E) case %s & %s\n", candidate[0].terminal.lexeme.c_str(), candidate[2].terminal.lexeme.c_str());
             if (candidate[0].terminal.token_type == RPAREN && candidate[2].terminal.token_type == LPAREN) {
                 output.expression = candidate[1].expression;
             }
@@ -510,7 +473,6 @@ stack_node Parser::reduce_candidate(vector<stack_node> candidate) {
         }
 
         else if (candidate[0].type == EXPRESSION && candidate[1].type == TERMINAL && candidate[2].type == EXPRESSION) {
-            if (DEBUG) printf("E+E case : %s\n", candidate[1].terminal.lexeme.c_str());
             if (candidate[1].terminal.token_type == PLUS || candidate[1].terminal.token_type == MINUS || candidate[1].terminal.token_type == MULT || candidate[1].terminal.token_type == DIV) {
                 output.expression = program.combine_expressions(candidate[1].terminal, candidate[0].expression, candidate[2].expression);
             }
@@ -529,25 +491,15 @@ stack_node Parser::reduce_candidate(vector<stack_node> candidate) {
     }
 
     return output;
-
-    if (DEBUG) printf("Candidate expression reduction complete\n");
 }
 
 int main() {
     Parser parser;
 
-    if (DEBUG) printf("Starting Parsing.\n");
-
     parser.parse_program();
 
-    if (DEBUG) printf("Parsing complete.\n");
-
-    if (DEBUG) printf("Starting Execution.\n");
-
-    Execute executor = Execute(parser.program);
+    Execute executor = Execute(parser.get_program());
     executor.execute_program();
-
-    if (DEBUG) printf("Execution complete.\n");
 
     return 0;
 }

@@ -128,13 +128,13 @@ class Program {
         void add_variable(Variable);
         Variable find_variable(string);
         int get_variable_index(string);
-        vector<Variable> list_of_variables;
-
+        
+        void update_variable(int, Variable);
         InstructionNode * get_head() {return head;}
 
     private:
         vector<InstructionNode*> list_of_all_instructions;
-
+        vector<Variable> list_of_variables;
         vector<Expression*> list_of_all_expressions;
 
         InstructionNode * head = nullptr;
