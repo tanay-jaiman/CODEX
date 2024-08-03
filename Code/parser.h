@@ -8,12 +8,11 @@ class Parser {
         LexicalAnalyzer lexer;
         Token expect(TokenType);
 
-        Program program = Program();
         OperatorPrecedence table = OperatorPrecedence();
 
     public:
         // TODO : MODIFY SYNTAX ERROR TO DISPLAY ACCURATE LINE NUMBER BY REMOVING THE PARAMETER AND INSTEAD USING UNGETTOKEN
-        void syntax_error(int line_number);
+        void syntax_error();
         void throw_declaration_error(int type, Token token);
 
         void parse_program();
@@ -39,4 +38,5 @@ class Parser {
         boolean_operator parse_condition_operator();
 
         stack_node reduce_candidate(vector<stack_node>);
+        Program program;
 };

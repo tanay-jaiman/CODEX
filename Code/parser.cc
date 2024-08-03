@@ -4,14 +4,14 @@ using namespace std;
 
 #define DEBUG 0
 
-void Parser::syntax_error(int line_number) {
-    printf("Syntax Error found on line number : %d\n", line_number);
+void Parser::syntax_error() {
+    printf("Syntax Error found on line number : %d\n", lexer.unget_token().line_number);
     exit(1);
 }
 
 Token Parser::expect(TokenType t) {
     if (lexer.peek_token(0).token_type != t) 
-        syntax_error(lexer.peek_token(0).line_number);
+        syntax_error();
 
     Token a = lexer.get_token();
 
@@ -116,7 +116,7 @@ void Parser::parse_statement() {
             break;
 
         default:
-            syntax_error(lexer.peek_token(0).line_number);
+            syntax_error();
     }
 
     if (comment_found())
@@ -187,7 +187,7 @@ void Parser::parse_if_statement() {
     
     Condition condition = parse_condition();
     InstructionNode * condition_instruction = program.create_instruction(CJMP_INSTRUCTION);
-    condition_instruction->set_cjmp_instruction(condition, end_of_if);
+    condition_instruction->set_cjmp_instruction(condition, end_of_if, false);
     program.add_instruction(condition_instruction);
 
     expect(RPAREN);
@@ -197,6 +197,7 @@ void Parser::parse_if_statement() {
 
     InstructionNode * end_of_consider = program.create_instruction(JMP_INSTRUCTION);
     end_of_consider->set_jmp_instruction(end_of_if);
+    program.add_instruction(end_of_consider);
 
     expect(RBRACE);
 
@@ -207,7 +208,7 @@ void Parser::parse_if_statement() {
         InstructionNode * start_of_otherwise = program.create_instruction(NOOP_INSTRUCTION);
         program.add_instruction(start_of_otherwise);
 
-        condition_instruction->set_cjmp_instruction(condition, start_of_otherwise);
+        condition_instruction->set_cjmp_instruction(condition, start_of_otherwise, false);
 
         parse_statement_list();
 
@@ -231,7 +232,7 @@ void Parser::parse_while_statement() {
 
     Condition condition = parse_condition();
     InstructionNode * condition_instruction = program.create_instruction(CJMP_INSTRUCTION);
-    condition_instruction->set_cjmp_instruction(condition, end_of_while);
+    condition_instruction->set_cjmp_instruction(condition, end_of_while, true);
 
     program.add_instruction(condition_instruction);
 
@@ -240,6 +241,11 @@ void Parser::parse_while_statement() {
     expect(LBRACE);
 
     parse_statement_list();
+
+    InstructionNode * jump_instruction = program.create_instruction(JMP_INSTRUCTION);
+    jump_instruction->set_jmp_instruction(condition_instruction);
+
+    program.add_instruction(jump_instruction);
 
     expect(RBRACE);
 
@@ -269,6 +275,8 @@ Condition Parser::parse_condition() {
     output.left = parse_expression();
     output.oper = parse_condition_operator();
     output.right = parse_expression();
+
+    return output;
 }
 
 boolean_operator Parser::parse_condition_operator() {
@@ -320,6 +328,14 @@ Variable Program::find_variable(string var_name) {
     return output;
 }
 
+int Program::get_variable_index(string var_name) {
+    for (int i = 0; i < list_of_variables.size(); i++) {
+        if (list_of_variables[i].token.lexeme == var_name) {
+            return i;
+        }
+    }
+}
+
 void Program::add_variable(Variable var) {
     list_of_variables.push_back(var);
 }
@@ -342,13 +358,6 @@ void Parser::throw_declaration_error(int type, Token token) {
     - If a variable is being declared and it already exists, error (T1)
     - If a variable is being accessed and it exists, return it
     - If a variable is being accessed and it doens't exist, error (T2)
-
-    TODO:
-        Currently error throwing gives no information about where the error occurred or how it can be fixed. That needs to be fixed for appropriate debug information. Top priority before Operator Precedence and parse_expression is started. 
-
-        This would probably require optimizing instruction.h and making the structures more robust.
-
-        The whole scenario regarding Variables and literals is a bit dodgy. Also needs to be decided if variable assignment is calculated at runtime or parse time? => decision := runtime
 */
 Variable Parser::parse_id(bool variable_exists, bool constant) {
     if (DEBUG) printf("ID parsing started.\n");
@@ -399,14 +408,15 @@ Expression * Parser::parse_expression() {
     Stack stack = Stack();
 
     while (true) {
+        if (DEBUG) printf("Parse Expression Loop\n");
         if (stack.back().type == TERMINAL && stack.back().terminal.token_type == END_OF_FILE && lexer.peek_symbol(0).token_type == END_OF_FILE) {
-            syntax_error(lexer.peek_token(0).line_number);
+            syntax_error();
         }
 
         stack_node last_terminal = stack.peek_terminal();
 
         if (last_terminal.type == ERROR_STACK_NODE)
-            syntax_error(lexer.peek_token(0).line_number);
+            syntax_error();
 
         precedence p = table.get_precedence(last_terminal.terminal.token_type, lexer.peek_symbol(0).token_type);
 
@@ -431,7 +441,7 @@ Expression * Parser::parse_expression() {
                 last_terminal = stack.peek_terminal();
 
                 if (last_terminal.type == ERROR_STACK_NODE)
-                    syntax_error(lexer.peek_token(0).line_number);
+                    syntax_error();
 
                 if (stack.back().type == TERMINAL && last_popped.type == TERMINAL && table.get_precedence(last_terminal.terminal.token_type, last_popped.terminal.token_type) == LESS_PRECEDENCE) {
                     break;
@@ -446,7 +456,7 @@ Expression * Parser::parse_expression() {
             return stack.get(1).expression;
 
         else 
-            syntax_error(lexer.peek_token(0).line_number);
+            syntax_error();
     }
     
 
@@ -456,8 +466,8 @@ Expression * Parser::parse_expression() {
 
 Expression * Program::combine_expressions(Token OP, Expression * left, Expression * right) {
     Expression * output = create_expression(OP_EXPR, OP);
-    output->left = left;
-    output->right = right;
+    output->left = right;
+    output->right = left;
 
     return output;
 }
@@ -482,38 +492,40 @@ stack_node Parser::reduce_candidate(vector<stack_node> candidate) {
         }
 
         else {
-            syntax_error(lexer.peek_token(0).line_number);
+            syntax_error();
         }
     }
 
     // reduce (E) | E +-*/ E
     else if (candidate.size() == 3) {
         if (candidate[0].type == TERMINAL && candidate[1].type == EXPRESSION && candidate[2].type == TERMINAL) {
-            if (candidate[0].terminal.token_type == LPAREN && candidate[2].terminal.token_type == RPAREN) {
+            if (DEBUG) printf("(E) case %s & %s\n", candidate[0].terminal.lexeme.c_str(), candidate[2].terminal.lexeme.c_str());
+            if (candidate[0].terminal.token_type == RPAREN && candidate[2].terminal.token_type == LPAREN) {
                 output.expression = candidate[1].expression;
             }
 
             else {
-                syntax_error(lexer.peek_token(0).line_number);
+                syntax_error();
             }
         }
 
         else if (candidate[0].type == EXPRESSION && candidate[1].type == TERMINAL && candidate[2].type == EXPRESSION) {
+            if (DEBUG) printf("E+E case : %s\n", candidate[1].terminal.lexeme.c_str());
             if (candidate[1].terminal.token_type == PLUS || candidate[1].terminal.token_type == MINUS || candidate[1].terminal.token_type == MULT || candidate[1].terminal.token_type == DIV) {
                 output.expression = program.combine_expressions(candidate[1].terminal, candidate[0].expression, candidate[2].expression);
             }
 
             else 
-                syntax_error(lexer.peek_token(0).line_number);
+                syntax_error();
         }
 
         else {
-            syntax_error(lexer.peek_token(0).line_number);
+            syntax_error();
         } 
     }
 
     else {
-        syntax_error(lexer.peek_token(0).line_number);
+        syntax_error();
     }
 
     return output;
@@ -529,5 +541,13 @@ int main() {
     parser.parse_program();
 
     if (DEBUG) printf("Parsing complete.\n");
+
+    if (DEBUG) printf("Starting Execution.\n");
+
+    Execute executor = Execute(parser.program);
+    executor.execute_program();
+
+    if (DEBUG) printf("Execution complete.\n");
+
     return 0;
 }

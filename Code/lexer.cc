@@ -1,5 +1,5 @@
 #include "lexer.h"
-#include <cctype>
+// #include <cctype>
 
 #define DEBUG 0
 
@@ -144,7 +144,12 @@ Token LexicalAnalyzer::scan_id_or_keyword(Line current_line, int index)
     Token output = Token();
     output.line_number = current_line.line_number;
 
-    while (isalpha(line[index]))
+    if (isalpha(line[index])) {
+        output.lexeme += line[index];
+        index++;
+    }
+
+    while (isalpha(line[index]) || isdigit(line[index]) || line[index] == '_')
     {
         output.lexeme += line[index];
         index++;
@@ -314,7 +319,9 @@ Token LexicalAnalyzer::scan_symbol(Line current_line, int index)
     return output;
 }
 
-Token L
+Token LexicalAnalyzer::unget_token() {
+    return token_list[--token_index];
+}
 
 Token LexicalAnalyzer::get_token()
 {

@@ -49,7 +49,7 @@ stack_node Stack::back() {
 
 void OperatorPrecedence::create_table() {
     create_row("01000040");
-    create_row("42111114");
+    create_row("42222224");
     create_row("02220020");
     create_row("02220020");
     create_row("02222220");

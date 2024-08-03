@@ -38,7 +38,7 @@ enum boolean_operator {
 };
 
 enum expression_type {
-    NUM_EXPR, STRING_EXPR, VAR_EXPR, OP_EXPR, ERROR_EXPR
+    NUM_EXPR, STRING_EXPR, VAR_EXPR, OP_EXPR
 };
 
 // using expr_value = variant<Token, float>;
@@ -70,6 +70,7 @@ struct print_instruction {
 struct cjmp_instruction {
     Condition condition;
     InstructionNode * instruction;
+    bool is_while;
 };
 
 struct jmp_instruction {
@@ -96,21 +97,15 @@ struct InstructionNode {
         instruction = print_instruction{expression};
     }
 
-    void set_cjmp_instruction(const Condition condition, InstructionNode * ins) {
+    void set_cjmp_instruction(const Condition condition, InstructionNode * ins, bool is_while) {
         type = CJMP_INSTRUCTION;
-        instruction = cjmp_instruction{condition, ins};
+        instruction = cjmp_instruction{condition, ins, is_while};
     }
 
     void set_jmp_instruction(InstructionNode * ins) {
         type = JMP_INSTRUCTION;
         instruction = jmp_instruction{ins};
     }
-};
-
-struct TypeError {
-    int line_number;
-    expression_type left;
-    expression_type right;
 };
 
 class Program {
@@ -132,17 +127,15 @@ class Program {
 
         void add_variable(Variable);
         Variable find_variable(string);
+        int get_variable_index(string);
+        vector<Variable> list_of_variables;
 
-        void add_type_error(TypeError);
+        InstructionNode * get_head() {return head;}
 
     private:
         vector<InstructionNode*> list_of_all_instructions;
 
         vector<Expression*> list_of_all_expressions;
-
-        vector<Variable> list_of_variables;
-
-        vector<TypeError> list_of_type_errors;
 
         InstructionNode * head = nullptr;
 };
