@@ -493,7 +493,8 @@ stack_node Parser::reduce_candidate(vector<stack_node> candidate) {
     return output;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+
     Parser parser;
 
     parser.parse_program();

@@ -4,4 +4,4 @@ sample.txt
 compile.sh
 TABLET
 a.out*
-test.txt
+test.txt*test[.txt]

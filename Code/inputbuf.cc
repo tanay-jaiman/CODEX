@@ -23,7 +23,7 @@ InputBuffer::InputBuffer() {
 */
 void InputBuffer::skip_spaces() {
     while (buf_index < char_list.size()) {
-        if (char_list[buf_index] == ' ') {
+        if (char_list[buf_index] == ' ' || char_list[buf_index] == '\t') {
             buf_index++;
         }
 
