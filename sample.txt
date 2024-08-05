@@ -1,0 +1,24 @@
+proclaim hero = "Julius Caesar" ;
+engrave kingdom = "Camelot" ;
+
+hero = "Arthur";
+
+announce "The hero's name is " + hero + " and they're from " + kingdom ; // in-line comment
+
+proclaim number = 1.0 + 1 * (3 / 4) * 4 / (3 / 3);
+
+announce (number * 4 - 6);
+
+consider (hero == "Arthur") {
+    announce "Welcome, King " + hero + "!" ;
+} otherwise {
+    announce "You are not the true king." ;
+}
+
+proclaim count = 1.0 ;
+whilst (count <= 5) {
+    announce "Count is " + count ;
+    count = count + 1;
+    // this is a comment
+}
+ // Usage ./CODEX < sample.txt
