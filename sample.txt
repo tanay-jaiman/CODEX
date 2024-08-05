@@ -1,14 +1,13 @@
 proclaim hero = "Julius Caesar" ;
 engrave kingdom = "Camelot" ;
 
-hero = "Arthur";
-
 announce "The hero's name is " + hero + " and they're from " + kingdom ; // in-line comment
 
-proclaim number = 1.0 + 1 * (3 / 4) * 4 / (3 / 3);
+proclaim number = 1.0 + 1 * (3 / 4) * 4 / (3 / 3); // should be 4
 
-announce (number * 4 - 6);
+announce (number * 4 - 6); // should be 10
 
+hero = "Arthur"; // value updated
 consider (hero == "Arthur") {
     announce "Welcome, King " + hero + "!" ;
 } otherwise {
